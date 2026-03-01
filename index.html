@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>내 시간표</title>
+
+<style>
+body {
+  font-family: sans-serif;
+  text-align: center;
+  margin: 20px;
+}
+
+h1 {
+  margin-bottom: 10px;
+}
+
+input {
+  padding: 8px;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+button {
+  padding: 8px 15px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+th, td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  font-size: 14px;
+}
+
+th {
+  background-color: #f0f0f0;
+}
+
+@media (max-width: 768px) {
+  th, td {
+    font-size: 12px;
+    padding: 6px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<h1>📚 내 이동수업 시간표</h1>
+
+<input type="text" id="studentNumber" placeholder="학번 입력 (예: 30505)">
+<button onclick="generate()">시간표 보기</button>
+
+<table id="timetable">
+</table>
+
+<script>
+
+// 학번별 배치 데이터
+const students = {
+
+  "3524": {
+    A: { name: "영어독해와작문", room: "3반" },
+    B: { name: "화법과작문", room: "3반" },
+    C: { name: "미적분", room: "3반" },
+    D: { name: "생명과학2", room: "과학실" },
+    E: { name: "사회문화", room: "3반" },
+    F: { name: "물리학2", room: "6반" },
+    G: { name: "체육/정보/환경", room: "3층 C실" },
+    H: { name: "인공지능수학", room: "수학실" }
+  },
+
+  "3517": {
+    A: { name: "미적분", room: "2반" },
+    B: { name: "기하", room: "2반" },
+    C: { name: "화학2", room: "3층 B실" },
+    D: { name: "화법과작문", room: "2반" },
+    E: { name: "생명과학2", room: "3층 B실" },
+    F: { name: "물리학2", room: "6반" },
+    G: { name: "체육/정보/환경", room: "3층 C실" },
+    H: { name: "인공지능수학", room: "수학실" }
+  }
+
+};
+
+
+// 주간 세트표
+const weekly = [
+  ["자율", "B", "E", "B", "G"],
+  ["D", "G", "D", "G", "C"],
+  ["F", "A", "B", "H", "D"],
+  ["E", "D", "F", "E", "B"],
+  ["G", "F", "C", "C", "E"],
+  ["C", "진로", "A", "F", "A"],
+  ["", "동아리", "", "A", ""]
+];
+
+const days = ["월", "화", "수", "목", "금"];
+
+function generate() {
+
+  const studentNumber = document.getElementById("studentNumber").value;
+  const table = document.getElementById("timetable");
+  table.innerHTML = "";
+
+  if (!students[studentNumber]) {
+    table.innerHTML = "<tr><td>등록되지 않은 학번입니다</td></tr>";
+    return;
+  }
+
+  const subjects = students[studentNumber];
+
+  let header = "<tr><th>교시</th>";
+  days.forEach(day => header += `<th>${day}</th>`);
+  header += "</tr>";
+  table.innerHTML += header;
+
+  weekly.forEach((row, i) => {
+    let line = `<tr><th>${i+1}교시</th>`;
+    row.forEach(cell => {
+      if (subjects[cell]) {
+        line += `<td>${cell} | ${subjects[cell].name} | ${subjects[cell].room}</td>`;
+      } else {
+        line += `<td>${cell}</td>`;
+      }
+    });
+    line += "</tr>";
+    table.innerHTML += line;
+  });
+}
+
+</script>
+
+</body>
+</html>
