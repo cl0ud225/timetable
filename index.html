@@ -13,16 +13,16 @@ body {
 }
 
 table {
-  width: 100%;
+  margin: 20px auto;
   border-collapse: collapse;
-  margin-top: 20px;
-  background: white;
+  width: 95%;
+  max-width: 900px;
 }
 
 th, td {
   border: 1px solid #ccc;
   padding: 10px;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 th {
@@ -35,14 +35,28 @@ th {
   font-weight: bold;
 }
 
-input, button {
-  padding: 8px;
-  font-size: 16px;
-  margin: 5px;
+td {
+  background: #fff;
 }
 
-.container {
-  overflow-x: auto;
+.set {
+  font-weight: bold;
+  font-size: 15px;
+  color: #4a6cff;
+  display: block;
+  margin-bottom: 4px;
+}
+
+input, button {
+  padding: 8px 12px;
+  margin: 5px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+button {
+  background: #4a6cff;
+  color: white;
+  border: none;
 }
 </style>
 </head>
@@ -54,85 +68,85 @@ input, button {
 <input type="text" id="studentId" placeholder="학번 입력">
 <button onclick="generate()">조회</button>
 
-<div class="container">
-<table id="timetable"></table>
-</div>
+<div id="tableArea"></div>
 
 <script>
 
-// 세트 시간표 구조
+// 주간 세트표
 const weekly = [
-  ["자율", "B", "E", "B", "G"],
-  ["D", "G", "D", "G", "C"],
-  ["F", "A", "B", "H", "D"],
-  ["E", "D", "F", "E", "B"],
-  ["G", "F", "C", "C", "E"],
-  ["C", "진로", "A", "F", "A"],
-  ["", "동아리", "", "A", ""]
+  ["자율","B","E","B","G"],
+  ["D","G","D","G","C"],
+  ["F","A","B","H","D"],
+  ["E","D","F","E","B"],
+  ["G","F","C","C","E"],
+  ["C","진로","A","F","A"],
+  ["","동아리","","A",""]
 ];
 
-const days = ["월", "화", "수", "목", "금"];
+const days = ["월","화","수","목","금"];
 
 const students = {
-
   "3524": {
-    A: ["영어 독해와 작문", "3반"],
-    B: ["화법과 작문", "2반"],
-    C: ["미적분", "1반"],
-    D: ["생명과학2", "4반"],
-    E: ["사회문화", "3반"],
-    F: ["물리학2", "2반"],
-    G: ["체육/정보/환경", "체육관"],
-    H: ["인공지능수학", "1반"]
+    A:["영어 독해와 작문","3반"],
+    B:["화법과 작문","2반"],
+    C:["미적분","1반"],
+    D:["생명과학2","4반"],
+    E:["사회문화","3반"],
+    F:["물리학2","2반"],
+    G:["체육/정보/환경","체육관"],
+    H:["인공지능수학","1반"]
   },
-
   "3517": {
-    A: ["미적분", "1반"],
-    B: ["기하", "2반"],
-    C: ["화학2", "3반"],
-    D: ["화법과 작문", "4반"],
-    E: ["생명과학2", "1반"],
-    F: ["물리학2", "2반"],
-    G: ["체육/정보/환경", "체육관"],
-    H: ["인공지능수학", "3반"]
+    A:["미적분","1반"],
+    B:["기하","2반"],
+    C:["화학2","3반"],
+    D:["화법과 작문","4반"],
+    E:["생명과학2","1반"],
+    F:["물리학2","2반"],
+    G:["체육/정보/환경","체육관"],
+    H:["인공지능수학","3반"]
   }
-
 };
 
 function generate() {
-
   const id = document.getElementById("studentId").value;
-  const table = document.getElementById("timetable");
-  table.innerHTML = "";
+  const area = document.getElementById("tableArea");
 
   if (!students[id]) {
-    table.innerHTML = "<tr><td>❌ 학번을 찾을 수 없습니다.</td></tr>";
+    area.innerHTML = "❌ 학번을 찾을 수 없습니다.";
     return;
   }
 
-  let header = "<tr><th>교시</th>";
-  days.forEach(day => header += `<th>${day}</th>`);
-  header += "</tr>";
-  table.innerHTML += header;
+  let html = "<table>";
+  html += "<tr><th>교시</th>";
+  days.forEach(d => html += `<th>${d}</th>`);
+  html += "</tr>";
 
   weekly.forEach((row, i) => {
-    let line = `<tr><td class="period">${i+1}교시</td>`;
-
+    html += `<tr><td class="period">${i+1}교시</td>`;
     row.forEach(cell => {
+
       if (students[id][cell]) {
         const subject = students[id][cell][0];
         const room = students[id][cell][1];
-        line += `<td>${subject}<br><small>${room}</small></td>`;
+
+        html += `
+          <td>
+            <span class="set">${cell}</span>
+            ${subject} | ${room}
+          </td>
+        `;
       } else {
-        line += `<td>${cell}</td>`;
+        html += `<td>${cell}</td>`;
       }
+
     });
-
-    line += "</tr>";
-    table.innerHTML += line;
+    html += "</tr>";
   });
-}
 
+  html += "</table>";
+  area.innerHTML = html;
+}
 </script>
 
 </body>
