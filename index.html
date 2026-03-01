@@ -5,146 +5,134 @@
 <title>이동수업 시간표</title>
 
 <style>
-:root {
-  --bg: #f4f6fb;
-  --card: #ffffff;
-  --text: #111;
-  --primary: #4a6cff;
-}
-
-.dark {
-  --bg: #121212;
-  --card: #1e1e1e;
-  --text: #f5f5f5;
-  --primary: #7c96ff;
-}
-
 body {
   font-family: Arial, sans-serif;
-  background: var(--bg);
-  color: var(--text);
+  background: #f4f6fb;
   text-align: center;
   padding: 20px;
-  transition: 0.3s;
 }
 
-input {
-  padding: 10px;
-  font-size: 16px;
-  border-radius: 8px;
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background: white;
+}
+
+th, td {
   border: 1px solid #ccc;
+  padding: 10px;
+  font-size: 14px;
 }
 
-button {
-  padding: 10px 15px;
-  font-size: 16px;
-  border-radius: 8px;
-  border: none;
-  background: var(--primary);
+th {
+  background: #4a6cff;
   color: white;
-  cursor: pointer;
+}
+
+.period {
+  background: #eee;
+  font-weight: bold;
+}
+
+input, button {
+  padding: 8px;
+  font-size: 16px;
   margin: 5px;
 }
 
-#result {
-  margin-top: 25px;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 15px;
-}
-
-.card {
-  background: var(--card);
-  padding: 15px;
-  border-radius: 15px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-}
-
-.set {
-  font-size: 20px;
-  font-weight: bold;
-  color: var(--primary);
-  margin-bottom: 8px;
+.container {
+  overflow-x: auto;
 }
 </style>
 </head>
 
 <body>
 
-<h1> 이동수업 시간표</h1>
+<h2>📚 이동수업 시간표</h2>
 
 <input type="text" id="studentId" placeholder="학번 입력">
-<button onclick="showTimetable()">조회</button>
-<button onclick="toggleDark()">🌙</button>
+<button onclick="generate()">조회</button>
 
-<div id="result"></div>
+<div class="container">
+<table id="timetable"></table>
+</div>
 
 <script>
-const data = {
+
+// 세트 시간표 구조
+const weekly = [
+  ["자율", "B", "E", "B", "G"],
+  ["D", "G", "D", "G", "C"],
+  ["F", "A", "B", "H", "D"],
+  ["E", "D", "F", "E", "B"],
+  ["G", "F", "C", "C", "E"],
+  ["C", "진로", "A", "F", "A"],
+  ["", "동아리", "", "A", ""]
+];
+
+const days = ["월", "화", "수", "목", "금"];
+
+const students = {
+
   "3524": {
-    "A": ["영어 독해와 작문", "3반"],
-    "B": ["화법과 작문", "2반"],
-    "C": ["미적분", "1반"],
-    "D": ["생명과학2", "4반"],
-    "E": ["사회문화", "3반"],
-    "F": ["물리학2", "2반"],
-    "G": ["체육/정보/환경", "체육관"],
-    "H": ["인공지능수학", "1반"]
+    A: ["영어 독해와 작문", "3반"],
+    B: ["화법과 작문", "2반"],
+    C: ["미적분", "1반"],
+    D: ["생명과학2", "4반"],
+    E: ["사회문화", "3반"],
+    F: ["물리학2", "2반"],
+    G: ["체육/정보/환경", "체육관"],
+    H: ["인공지능수학", "1반"]
   },
+
   "3517": {
-    "A": ["미적분", "1반"],
-    "B": ["기하", "2반"],
-    "C": ["화학2", "3반"],
-    "D": ["화법과 작문", "4반"],
-    "E": ["생명과학2", "1반"],
-    "F": ["물리학2", "2반"],
-    "G": ["체육/정보/환경", "체육관"],
-    "H": ["인공지능수학", "3반"]
+    A: ["미적분", "1반"],
+    B: ["기하", "2반"],
+    C: ["화학2", "3반"],
+    D: ["화법과 작문", "4반"],
+    E: ["생명과학2", "1반"],
+    F: ["물리학2", "2반"],
+    G: ["체육/정보/환경", "체육관"],
+    H: ["인공지능수학", "3반"]
   }
+
 };
 
-function showTimetable() {
-  const studentId = document.getElementById("studentId").value;
-  const result = document.getElementById("result");
-  result.innerHTML = "";
+function generate() {
 
-  if (data[studentId]) {
+  const id = document.getElementById("studentId").value;
+  const table = document.getElementById("timetable");
+  table.innerHTML = "";
 
-    // 학번 저장
-    localStorage.setItem("savedId", studentId);
-
-    for (let set in data[studentId]) {
-      const subject = data[studentId][set][0];
-      const classroom = data[studentId][set][1];
-
-      result.innerHTML += `
-        <div class="card">
-          <div class="set">${set}</div>
-          <div>${subject} | ${classroom}</div>
-        </div>
-      `;
-    }
-  } else {
-    result.innerHTML = "❌ 학번을 찾을 수 없습니다.";
+  if (!students[id]) {
+    table.innerHTML = "<tr><td>❌ 학번을 찾을 수 없습니다.</td></tr>";
+    return;
   }
+
+  let header = "<tr><th>교시</th>";
+  days.forEach(day => header += `<th>${day}</th>`);
+  header += "</tr>";
+  table.innerHTML += header;
+
+  weekly.forEach((row, i) => {
+    let line = `<tr><td class="period">${i+1}교시</td>`;
+
+    row.forEach(cell => {
+      if (students[id][cell]) {
+        const subject = students[id][cell][0];
+        const room = students[id][cell][1];
+        line += `<td>${subject}<br><small>${room}</small></td>`;
+      } else {
+        line += `<td>${cell}</td>`;
+      }
+    });
+
+    line += "</tr>";
+    table.innerHTML += line;
+  });
 }
 
-function toggleDark() {
-  document.body.classList.toggle("dark");
-  localStorage.setItem("darkMode", document.body.classList.contains("dark"));
-}
-
-// 다크모드 유지
-if (localStorage.getItem("darkMode") === "true") {
-  document.body.classList.add("dark");
-}
-
-// 저장된 학번 자동 입력 + 자동 조회
-const savedId = localStorage.getItem("savedId");
-if (savedId) {
-  document.getElementById("studentId").value = savedId;
-  showTimetable();
-}
 </script>
 
 </body>
